@@ -1,5 +1,8 @@
 package com.bignerdranch.android.geoquiz;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,15 +16,20 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mCheatButton;
     private ImageButton mNextButton;
     private ImageButton mPrevButton;
     private TextView mQuestionTextView;
     private Toast myToast;
+
     private int mCurrentIndex = 0;
-    private static String TAG = "MainActivity";
-    private static String KEY_INDEX = "index";
     private int mCorrectAnswer = 0;
-    private static String KEY_ANSWER ="answer";
+    private boolean mIsCheater;
+
+    private static final String TAG = "MainActivity";
+    private static final String KEY_INDEX = "index";
+    private static final String KEY_ANSWER ="answer";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Question[] mQuestionBank = new Question[]{
             new Question(R.string.question_australia,true),
@@ -92,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 updateQuestion();
                 mTrueButton.setEnabled(true);
                 mFalseButton.setEnabled(true);
+                mIsCheater = false;
             }
         });
 
@@ -102,6 +111,16 @@ public class MainActivity extends AppCompatActivity {
                 mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
                 if (mCurrentIndex < 0) mCurrentIndex = mQuestionBank.length - 1;
                 updateQuestion();
+            }
+        });
+
+        mCheatButton = findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(MainActivity.this,answerIsTrue);
+                startActivityForResult(intent,REQUEST_CODE_CHEAT);
             }
         });
     }
@@ -144,18 +163,37 @@ public class MainActivity extends AppCompatActivity {
         bundle.putInt(KEY_ANSWER,mCorrectAnswer);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != REQUEST_CODE_CHEAT){
+            return;
+        }
+
+        if (resultCode != RESULT_OK){
+            return;
+        }
+
+        mIsCheater = CheatActivity.wasAnswerShown(data);
+    }
+
     private void updateQuestion(){
-        final int question = mQuestionBank[mCurrentIndex].getTextResId();
+        int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
     }
 
     private void checkAnswer(boolean userPressedTrue){
-        boolean unswerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-        int messageResId = R.string.incorrect_toast;
+        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+        int messageResId = 0;
 
-        if (unswerIsTrue == userPressedTrue){
-            messageResId = R.string.correct_toast;
-            mCorrectAnswer ++;
+        if (mIsCheater){
+            messageResId = R.string.judgment_toast;
+        }else{
+            if (answerIsTrue == userPressedTrue){
+                messageResId = R.string.correct_toast;
+                mCorrectAnswer ++;
+            }else{
+                messageResId = R.string.incorrect_toast;
+            }
         }
 
         myToast = Toast.makeText(this,messageResId,Toast.LENGTH_SHORT);
@@ -166,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
     private void showResult(){
         int percent = mCorrectAnswer * 100 / mQuestionBank.length;
         String answer = percent + "%";
-        
+
         myToast = Toast.makeText(this,answer,Toast.LENGTH_SHORT);
         myToast.setGravity(Gravity.TOP,0,160);
         myToast.show();
