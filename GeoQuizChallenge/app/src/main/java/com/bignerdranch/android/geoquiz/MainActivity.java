@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final String KEY_INDEX = "index";
     private static final String KEY_ANSWER ="answer";
+    private static final String KEY_CHEATER ="cheater";
     private static final int REQUEST_CODE_CHEAT = 0;
 
     private Question[] mQuestionBank = new Question[]{
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null){
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX,0);
             mCorrectAnswer = savedInstanceState.getInt(KEY_ANSWER,0);
+            mIsCheater = savedInstanceState.getBoolean(KEY_CHEATER,false);
         }
 
         mTrueButton = (Button) findViewById(R.id.true_button);
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 checkAnswer(true);
                 mTrueButton.setEnabled(false);
                 mFalseButton.setEnabled(false);
+                mNextButton.setEnabled(true);
 
                 if (mCurrentIndex == mQuestionBank.length-1){
                     showResult();
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 checkAnswer(false);
                 mTrueButton.setEnabled(false);
                 mFalseButton.setEnabled(false);
+                mNextButton.setEnabled(true);
 
                 if (mCurrentIndex == mQuestionBank.length-1){
                     showResult();
@@ -93,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mNextButton = (ImageButton)findViewById(R.id.next_button);
+        mNextButton.setEnabled(false);
         mNextButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -161,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG,"onSaveInstanceState() called");
         bundle.putInt(KEY_INDEX,mCurrentIndex);
         bundle.putInt(KEY_ANSWER,mCorrectAnswer);
+        bundle.putBoolean(KEY_CHEATER,mIsCheater);
     }
 
     @Override
