@@ -20,16 +20,19 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mNextButton;
     private ImageButton mPrevButton;
     private TextView mQuestionTextView;
+    private TextView mAttemptsTextView;
     private Toast myToast;
 
     private int mCurrentIndex = 0;
     private int mCorrectAnswer = 0;
+    private int mAttemptCount = 3;
     private boolean mIsCheater;
 
     private static final String TAG = "MainActivity";
     private static final String KEY_INDEX = "index";
     private static final String KEY_ANSWER ="answer";
     private static final String KEY_CHEATER ="cheater";
+    private static final String KEY_ATTEMPTS = "attempts";
     private static final int REQUEST_CODE_CHEAT = 0;
 
     private Question[] mQuestionBank = new Question[]{
@@ -52,7 +55,17 @@ public class MainActivity extends AppCompatActivity {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX,0);
             mCorrectAnswer = savedInstanceState.getInt(KEY_ANSWER,0);
             mIsCheater = savedInstanceState.getBoolean(KEY_CHEATER,false);
+            mAttemptCount = savedInstanceState.getInt(KEY_ATTEMPTS, 3);
         }
+        mCheatButton = findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(MainActivity.this,answerIsTrue);
+                startActivityForResult(intent,REQUEST_CODE_CHEAT);
+            }
+        });
 
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mCurrentIndex == mQuestionBank.length-1){
                     showResult();
                     mCorrectAnswer = 0;
+                    mAttemptCount = 3;
                 }
             }
         });
@@ -82,17 +96,20 @@ public class MainActivity extends AppCompatActivity {
                 if (mCurrentIndex == mQuestionBank.length-1){
                     showResult();
                     mCorrectAnswer = 0;
+                    mAttemptCount = 3;
                 }
             }
         });
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
         updateQuestion();
+        updateAttemptCount();
         mQuestionTextView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
                 updateQuestion();
+                updateAttemptCount();
             }
         });
 
@@ -103,8 +120,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
                 updateQuestion();
+                updateAttemptCount();
                 mTrueButton.setEnabled(true);
                 mFalseButton.setEnabled(true);
+                mNextButton.setEnabled(false);
                 mIsCheater = false;
             }
         });
@@ -116,18 +135,10 @@ public class MainActivity extends AppCompatActivity {
                 mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
                 if (mCurrentIndex < 0) mCurrentIndex = mQuestionBank.length - 1;
                 updateQuestion();
+                updateAttemptCount();
             }
         });
 
-        mCheatButton = findViewById(R.id.cheat_button);
-        mCheatButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-                Intent intent = CheatActivity.newIntent(MainActivity.this,answerIsTrue);
-                startActivityForResult(intent,REQUEST_CODE_CHEAT);
-            }
-        });
     }
 
     @Override
@@ -167,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
         bundle.putInt(KEY_INDEX,mCurrentIndex);
         bundle.putInt(KEY_ANSWER,mCorrectAnswer);
         bundle.putBoolean(KEY_CHEATER,mIsCheater);
+        bundle.putInt(KEY_ATTEMPTS, mAttemptCount);
     }
 
     @Override
@@ -180,11 +192,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mIsCheater = CheatActivity.wasAnswerShown(data);
+        mAttemptCount --;
     }
 
     private void updateQuestion(){
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+    }
+
+    private void updateAttemptCount(){
+        mAttemptsTextView = findViewById(R.id.attempt_text_view);
+        String messageAboutAttemptCount = getResources().getString(R.string.attempt_count)+ String.valueOf(mAttemptCount);
+        mAttemptsTextView.setText(messageAboutAttemptCount);
+
+        if (mAttemptCount < 1){
+            mCheatButton.setEnabled(false);
+        }else {
+            mCheatButton.setEnabled(true);
+        }
     }
 
     private void checkAnswer(boolean userPressedTrue){
