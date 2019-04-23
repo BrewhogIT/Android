@@ -22,7 +22,7 @@ public class CrimeLab {
         }
     }
 
-    public CrimeLab get(Context context){
+    public static CrimeLab get(Context context){
         if (sCrimeLab == null){
             sCrimeLab = new CrimeLab(context);
         }
