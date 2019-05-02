@@ -1,6 +1,12 @@
 package com.bignerdranch.android.criminalintent;
 
+import android.text.format.DateFormat;
+
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 public class Crime {
@@ -27,8 +33,13 @@ public class Crime {
         mTitle = title;
     }
 
-    public Date getDate() {
-        return mDate;
+    public String getDate() {
+// Another way to format date:
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.ENGLISH);
+//        String crimeDate = dateFormat.format(mDate);
+
+
+        return (String) DateFormat.format("EEEE, MMM dd, yyyy", mDate);
     }
 
     public void setDate(Date date) {
