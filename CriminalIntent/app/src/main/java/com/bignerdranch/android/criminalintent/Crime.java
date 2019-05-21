@@ -33,12 +33,14 @@ public class Crime {
         mTitle = title;
     }
 
-    public String getDate() {
-// Another way to format date:
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.ENGLISH);
-//        String crimeDate = dateFormat.format(mDate);
+    public Date getDate() {
+        return mDate;
+    }
 
-        return (String) DateFormat.format("EEEE, MMM dd, yyyy", mDate);
+    public String getStringDate(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.ENGLISH);
+        String crimeDate = dateFormat.format(mDate);
+        return crimeDate;
     }
 
     public void setDate(Date date) {
