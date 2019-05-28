@@ -3,6 +3,7 @@ package com.bignerdranch.android.criminalintent;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,11 +34,20 @@ public class CrimeLab {
             }
         }
 
-
         return null;
     }
 
     public void addCrime (Crime c){
         mCrimes.add(c);
+    }
+    public void delCrime(UUID id){
+        Iterator iterator = mCrimes.iterator();
+
+        while (iterator.hasNext()){
+            Crime someCrime = (Crime) iterator.next();
+            if (id.equals(someCrime.getId())){
+                iterator.remove();
+            }
+        }
     }
 }
