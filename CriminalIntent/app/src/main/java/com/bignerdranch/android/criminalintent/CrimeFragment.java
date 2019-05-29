@@ -164,15 +164,17 @@ public class CrimeFragment extends Fragment {
         switch (item.getItemId()){
             case R.id.del_crime:
                 CrimeLab.get(getActivity()).delCrime(mCrime.getId());
-
-                Intent intent = new Intent(getActivity(),CrimeListActivity.class);
-                intent.addFlags(intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                getActivity().finish();
-
+                shutActivity();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void shutActivity() {
+        Intent intent = new Intent(getActivity(), CrimeListActivity.class);
+        intent.addFlags(intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        getActivity().finish();
     }
 }
