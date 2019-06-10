@@ -74,15 +74,6 @@ public class CrimeLab {
     }
 
     public void delCrime(UUID id) {
-//        Iterator iterator = mCrimes.iterator();
-//
-//        while (iterator.hasNext()){
-//            Crime someCrime = (Crime) iterator.next();
-//            if (id.equals(someCrime.getId())){
-//                iterator.remove();
-//            }
-//        }
-
         mDatabase.delete(CrimeTable.NAME,
                 CrimeTable.Cols.UUID + " = ?",
                 new String[]{id.toString()});
@@ -103,6 +94,8 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.TITLE, crime.getTitle());
         values.put(CrimeTable.Cols.DATE, crime.getDate().getTime());
         values.put(CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
+        values.put(CrimeTable.Cols.SUSPECT, crime.getSuspect());
+
         return values;
     }
 
