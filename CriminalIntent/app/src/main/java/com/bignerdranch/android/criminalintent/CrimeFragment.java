@@ -28,8 +28,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -39,6 +42,7 @@ import static android.widget.CompoundButton.*;
 
 public class CrimeFragment extends Fragment {
     private Crime mCrime;
+    private File mPhotoFile;
     private EditText mTitleField;
     private Button mDateButtom;
     private Button mTimeButtom;
@@ -46,6 +50,8 @@ public class CrimeFragment extends Fragment {
     private Button mSuspectButton;
     private Button mCallButton;
     private CheckBox mSolvedCheckBox;
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
     private static final String ARG_CRIME_ID = "crime_Id";
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
@@ -71,6 +77,7 @@ public class CrimeFragment extends Fragment {
 
         UUID crimeId = (UUID)getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
 
         setHasOptionsMenu(true);
     }
@@ -180,6 +187,9 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mPhotoButton = v.findViewById(R.id.crime_camera);
+        mPhotoView = v.findViewById(R.id.crime_photo);
+
         return v;
     }
 
@@ -261,12 +271,14 @@ public class CrimeFragment extends Fragment {
     private void readContact(String phoneID) {
         Cursor phone = getActivity().getContentResolver()
                 .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + phoneID,
-                        null,null,null);
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                        new String[]{phoneID},null,null);
 
         try {
             phone.moveToFirst();
-            phoneNumber = phone.getString(phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            phoneNumber = phone.getString(
+                    phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+            );
         } finally {
             phone.close();
         }
