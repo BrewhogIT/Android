@@ -90,8 +90,8 @@ public class CrimeLab {
     }
 
     public File getPhotoFile(Crime crime){
-        File fileDir = mContext.getFilesDir();
-        return new File (fileDir,crime.getPhotoFilename());
+        File filesDir = mContext.getFilesDir();
+        return new File (filesDir,crime.getPhotoFilename());
     }
 
     private static ContentValues getContentValues(Crime crime) {
