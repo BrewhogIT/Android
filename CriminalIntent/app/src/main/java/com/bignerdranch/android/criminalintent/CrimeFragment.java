@@ -9,6 +9,7 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -29,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -58,6 +60,8 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private ImageButton mPhotoButton;
     private ImageView mPhotoView;
+    private int widthPhotoView;
+    private int heighPhotoView;
     private static final String ARG_CRIME_ID = "crime_Id";
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
@@ -69,6 +73,7 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_PHOTO = 4;
     private String phoneNumber;
     private String phoneID;
+
 
     public static CrimeFragment newInstance (UUID crimeId){
         Bundle args = new Bundle();
@@ -232,10 +237,28 @@ public class CrimeFragment extends Fragment {
                 fragment.show(manager,DIALOG_PICTURE);
             }
         });
-        updatePhotoView();
+
+        final ViewTreeObserver treeObserver = mPhotoView.getViewTreeObserver();
+        treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mPhotoView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    mPhotoView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+
+                heighPhotoView = mPhotoView.getHeight();
+                widthPhotoView = mPhotoView.getWidth();
+
+                updatePhotoView();
+            }
+        });
+
 
         return v;
     }
+
 
     @Override
     public void onPause() {
@@ -397,11 +420,12 @@ public class CrimeFragment extends Fragment {
     }
 
     private void updatePhotoView(){
+
         if (mPhotoFile == null || !mPhotoFile.exists()){
             mPhotoView.setImageDrawable(null);
         }else{
             Bitmap bitmap = PictureUtils.getScaledBitmap(
-                    mPhotoFile.getPath(),getActivity());
+                    mPhotoFile.getPath(),widthPhotoView,heighPhotoView);
             mPhotoView.setImageBitmap(bitmap);
         }
     }
