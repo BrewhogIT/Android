@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,7 +22,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class CrimeListFragment extends Fragment {
     private RecyclerView mCrimeRecyclerView;
@@ -58,6 +61,7 @@ public class CrimeListFragment extends Fragment {
             mTitleTextView.setText(mCrime.getTitle());
             mDateTextView.setText(mCrime.getStringDate());
             mSolvedImageView.setVisibility(mCrime.isSolved() ? View.VISIBLE : View.GONE);
+            position = getAdapterPosition();
         }
 
         @Override
@@ -85,7 +89,8 @@ public class CrimeListFragment extends Fragment {
 
     }
 
-    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>{
+    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>
+    implements SimpleItemTouchHelperCallback.ItemTouchHelperAdapter{
         private List<Crime> mCrimes;
         private final int NEED_POLICE_VIEW = 1;
         private final int NOT_NEED_POLICE_VIEW = 0;
@@ -96,6 +101,29 @@ public class CrimeListFragment extends Fragment {
 
         public void setCrimes(List<Crime> crimes){
             mCrimes = crimes;
+        }
+
+        @Override
+        public void onItemDismiss(int position){
+            UUID id = mCrimes.get(position).getId();
+            CrimeLab.get(getActivity()).delCrime(id);
+            notifyItemRemoved(position);
+            updateUI();
+        }
+
+        @Override
+        public boolean onItemMove(int fromPosition, int toPosition){
+            if (fromPosition < toPosition){
+                for (int i = fromPosition; i < toPosition; i++){
+                    Collections.swap(mCrimes,i,i+1);
+                }
+            }else{
+                for (int i = fromPosition; i > toPosition; i--){
+                    Collections.swap(mCrimes,i,i-1);
+                }
+            }
+            notifyItemMoved(fromPosition,toPosition);
+            return true;
         }
 
         @NonNull
@@ -117,7 +145,6 @@ public class CrimeListFragment extends Fragment {
         public void onBindViewHolder(@NonNull CrimeHolder crimeHolder, int i) {
             Crime crime = mCrimes.get(i);
             crimeHolder.bind(crime);
-
         }
 
         @Override
@@ -169,6 +196,13 @@ public class CrimeListFragment extends Fragment {
         activity.getSupportActionBar().setTitle(subTitle);
     }
 
+    public void createNewCrime() {
+        Crime crime = new Crime();
+        CrimeLab.get(getActivity()).addCrime(crime);
+
+        mCallbacks.onCrimeSelected(crime);
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -203,6 +237,10 @@ public class CrimeListFragment extends Fragment {
         }
 
         updateUI();
+
+        SimpleItemTouchHelperCallback callback = new SimpleItemTouchHelperCallback(mAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(mCrimeRecyclerView);
         return view;
     }
 
@@ -210,6 +248,12 @@ public class CrimeListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateUI();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE,mSubtitleVisible);
     }
 
     @Override
@@ -246,18 +290,5 @@ public class CrimeListFragment extends Fragment {
              default:
                  return super.onOptionsItemSelected(item);
         }
-    }
-
-    public void createNewCrime() {
-        Crime crime = new Crime();
-        CrimeLab.get(getActivity()).addCrime(crime);
-
-        mCallbacks.onCrimeSelected(crime);
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(SAVED_SUBTITLE_VISIBLE,mSubtitleVisible);
     }
 }
