@@ -13,7 +13,6 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     }
 
     public interface ItemTouchHelperAdapter {
-        boolean onItemMove(int fromPosition, int toPosition);
         void onItemDismiss(int position);
     }
 
@@ -27,7 +26,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean isLongPressDragEnabled() {
-        return true;
+        return false;
     }
 
     @Override
@@ -39,8 +38,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     public boolean onMove(@NonNull RecyclerView recyclerView,
                           @NonNull RecyclerView.ViewHolder viewHolder,
                           @NonNull RecyclerView.ViewHolder viewHolder1) {
-
-        return mAdapter.onItemMove(viewHolder.getAdapterPosition(),viewHolder1.getAdapterPosition());
+        return false;
     }
 
     @Override
