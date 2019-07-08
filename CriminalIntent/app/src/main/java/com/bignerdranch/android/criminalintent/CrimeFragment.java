@@ -24,6 +24,7 @@ import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -386,9 +387,12 @@ public class CrimeFragment extends Fragment {
 
     private void updateDate() {
         Date actualDate = mCrime.getDate();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.ENGLISH);
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm",Locale.ENGLISH);
-        String date = dateFormat.format(actualDate);
+        String date = DateUtils.formatDateTime(getActivity()
+                ,actualDate.getTime()
+                ,DateUtils.FORMAT_SHOW_DATE |
+                        DateUtils.FORMAT_SHOW_YEAR |
+                        DateUtils.FORMAT_SHOW_WEEKDAY);
         String time = timeFormat.format(actualDate);
 
         mDateButtom.setText(date);
