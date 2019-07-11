@@ -1,4 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+
+
     <string name="app_name">CriminalIntent</string>
     <string name="crime_title_hint">Enter a title for the crime.</string>
     <string name="crime_title_label">Title</string>
@@ -26,6 +28,11 @@
     <string name="send_report">Send crime report via</string>
     <string name="call_text">Call to suspect</string>
     <string name="larger_picture">Photo of crime</string>
+    <string name="crime_photo_button_description">Take photo of crime scene</string>
+    <string name="crime_photo_no_image_description">
+        Crime scene photo (not set)
+    </string>
+    <string name="crime_photo_image_description">Crime scene photo (set)</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$d crime</item>

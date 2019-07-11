@@ -223,9 +223,7 @@ public class CrimeFragment extends Fragment {
         mPhotoButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = FileProvider.getUriForFile(getActivity(),
-                        "com.bignerdranch.android.criminalintent.fileprovider",
-                        mPhotoFile);
+                Uri uri = getUri();
                 captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 
                 List<ResolveInfo> cameraActivities = getActivity().getPackageManager()
@@ -333,15 +331,19 @@ public class CrimeFragment extends Fragment {
                 c.close();
             }
         }else if (requestCode == REQUEST_PHOTO){
-            Uri uri = FileProvider.getUriForFile(getActivity(),
-                    "com.bignerdranch.android.criminalintent.fileprovider",
-                    mPhotoFile);
+            Uri uri = getUri();
 
             getActivity().revokeUriPermission(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             updateCrime();
             updatePhotoView();
         }
 
+    }
+
+    public Uri getUri() {
+        return FileProvider.getUriForFile(getActivity(),
+                "com.bignerdranch.android.criminalintent.fileprovider",
+                mPhotoFile);
     }
 
     @Override
@@ -451,10 +453,15 @@ public class CrimeFragment extends Fragment {
 
         if (mPhotoFile == null || !mPhotoFile.exists()){
             mPhotoView.setImageDrawable(null);
+            mPhotoView.setContentDescription(
+                    getString(R.string.crime_photo_no_image_description));
         }else{
             Bitmap bitmap = PictureUtils.getScaledBitmap(
                     mPhotoFile.getPath(),widthPhotoView,heighPhotoView);
             mPhotoView.setImageBitmap(bitmap);
+            mPhotoView.setContentDescription(
+                    getString(R.string.crime_photo_image_description));
         }
     }
+
 }
