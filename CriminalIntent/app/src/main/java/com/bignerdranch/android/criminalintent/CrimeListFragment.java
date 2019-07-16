@@ -62,6 +62,13 @@ public class CrimeListFragment extends Fragment {
             mDateTextView.setText(mCrime.getStringDate());
             mSolvedImageView.setVisibility(mCrime.isSolved() ? View.VISIBLE : View.GONE);
             position = getAdapterPosition();
+
+            int quantity = mCrime.isSolved() ? 1 : 0;
+            itemView.setContentDescription(getResources().getQuantityString(
+                    R.plurals.talk_back_crime_plurals,
+                    quantity,
+                    mCrime.getTitle(),
+                    mCrime.getStringDate()));
         }
 
         @Override

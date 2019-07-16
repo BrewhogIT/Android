@@ -336,6 +336,7 @@ public class CrimeFragment extends Fragment {
             getActivity().revokeUriPermission(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             updateCrime();
             updatePhotoView();
+            mPhotoView.announceForAccessibility("Photo was been changed");
         }
 
     }

@@ -39,5 +39,10 @@
         <item quantity="other">%1$d crimes</item>
     </plurals>
 
+    <plurals name="talk_back_crime_plurals">
+        <item quantity="one">%1$s, time of crime %2$s, was solved</item>
+        <item quantity="other">%1$s, time of crime %2$s, was not solved </item>
+    </plurals>
+
 
 </resources>
