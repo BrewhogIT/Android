@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -64,19 +66,23 @@ public class NerdLauncherFragment extends Fragment {
 
     private class ActivityHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView mNameTextView;
+        private ImageView mIconImageView;
         private ResolveInfo mResolveInfo;
 
         public ActivityHolder(@NonNull View itemView) {
             super(itemView);
-            mNameTextView = (TextView) itemView;
-            mNameTextView.setOnClickListener(this);
+            mNameTextView = itemView.findViewById(R.id.app_name_text_view);
+            mIconImageView = itemView.findViewById(R.id.app_icon_image_view);
+            itemView.setOnClickListener(this);
         }
 
         public void bindActivity(ResolveInfo resolveInfo){
             mResolveInfo = resolveInfo;
             PackageManager pm = getActivity().getPackageManager();
             String appName = mResolveInfo.loadLabel(pm).toString();
+            Drawable icon = mResolveInfo.loadIcon(pm);
             mNameTextView.setText(appName);
+            mIconImageView.setImageDrawable(icon);
         }
 
         @Override
@@ -99,7 +105,7 @@ public class NerdLauncherFragment extends Fragment {
         @Override
         public ActivityHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View view = inflater.inflate(android.R.layout.simple_list_item_1,viewGroup,false);
+            View view = inflater.inflate(R.layout.app_fragment,viewGroup,false);
             return new ActivityHolder(view);
         }
 
@@ -114,4 +120,5 @@ public class NerdLauncherFragment extends Fragment {
             return mActivities.size();
         }
     }
+
 }
