@@ -4,6 +4,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,10 +14,13 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class FlickrFetchr {
@@ -68,12 +74,14 @@ public class FlickrFetchr {
 
             Log.i(TAG,"Received JSON: " + jsonString);
             JSONObject jsonBody = new JSONObject(jsonString);
-            parseItems(items,jsonBody);
+//            parseItems(items,jsonBody);
+            gsonParseItem(items,jsonBody);
         } catch (IOException ioe) {
             Log.e(TAG,"Failed to fetch mGalleryItems",ioe);
         } catch (JSONException je){
             Log.e(TAG, "Failed to parse JSON", je);
         }
+        Log.i(TAG,"items length after return is: " + items.size());
 
         return items;
     }
@@ -96,6 +104,24 @@ public class FlickrFetchr {
 
             item.setUrl(photoJsonObject.getString("url_s"));
             items.add(item);
+        }
+    }
+
+    public void gsonParseItem(List<GalleryItem> items, JSONObject jsonBody)
+            throws JSONException {
+        JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
+        String stringPhotoJsonArray = photosJsonObject.optJSONArray("photo").toString();
+
+        Type listItemType = new TypeToken<List<GalleryItem>>(){}.getType();
+        ArrayList<GalleryItem> list = new Gson().fromJson(stringPhotoJsonArray,listItemType);
+
+        Iterator<GalleryItem> itemIterator = list.iterator();
+        while (itemIterator.hasNext()){
+            GalleryItem item = itemIterator.next();
+
+            if (item.getUrl() != null){
+                items.add(item);
+            }
         }
     }
 
