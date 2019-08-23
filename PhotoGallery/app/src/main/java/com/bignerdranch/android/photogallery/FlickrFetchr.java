@@ -26,6 +26,8 @@ import java.util.List;
 public class FlickrFetchr {
     private final String TAG = "FlickrFetchr";
     private final String API_KEY = "b97565cb39811c157e51eea4c2b14be5";
+    private static int pageNumber = 1;
+    private static int maxPage = 0;
 
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
@@ -58,8 +60,8 @@ public class FlickrFetchr {
     }
 
     public List<GalleryItem> fetchItems(){
-
         List<GalleryItem> items = new ArrayList<>();
+        String strPageNumber = String.valueOf(pageNumber);
 
         try {
             String url = Uri.parse("https://api.flickr.com/services/rest/")
@@ -69,6 +71,7 @@ public class FlickrFetchr {
                     .appendQueryParameter("format","json")
                     .appendQueryParameter("nojsoncallback","1")
                     .appendQueryParameter("extras","url_s")
+                    .appendQueryParameter("page",strPageNumber)
                     .build().toString();
             String jsonString = getUrlString(url);
 
@@ -111,6 +114,7 @@ public class FlickrFetchr {
             throws JSONException {
         JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
         String stringPhotoJsonArray = photosJsonObject.optJSONArray("photo").toString();
+        maxPage = photosJsonObject.getInt("pages");
 
         Type listItemType = new TypeToken<List<GalleryItem>>(){}.getType();
         ArrayList<GalleryItem> list = new Gson().fromJson(stringPhotoJsonArray,listItemType);
@@ -123,6 +127,18 @@ public class FlickrFetchr {
                 items.add(item);
             }
         }
+    }
+
+    public static void updatePage(){
+        pageNumber++;
+    }
+
+    public static int getMaxPage(){
+        return maxPage;
+    }
+
+    public static int getPageNumber(){
+        return pageNumber;
     }
 
 }

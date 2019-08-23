@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ public class PhotoGalleryFragment extends Fragment {
     private RecyclerView mPhotoRecyclerView;
     private final String TAG = "PhotoGalleryFragment";
     private List<GalleryItem> mItems = new ArrayList<>();
+    private boolean isLoading = false;
 
     public static PhotoGalleryFragment newInstance(){
         return new PhotoGalleryFragment();
@@ -37,8 +39,38 @@ public class PhotoGalleryFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
+        final RecyclerView.LayoutManager manager = new GridLayoutManager(getActivity(),3);
         mPhotoRecyclerView = v.findViewById(R.id.photo_recycler_view);
-        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
+        mPhotoRecyclerView.setLayoutManager(manager);
+        mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int visibleItemCount = manager.getChildCount();
+                int totalItemCount = manager.getItemCount();
+                int firstVisibleItemPosition = ((GridLayoutManager) manager).findFirstVisibleItemPosition();
+
+                Log.i(TAG,"totalItemCount: " + totalItemCount +"\n"+
+                        "visible item count is: " + visibleItemCount+ "\n"+
+                        "first visible position is: " + firstVisibleItemPosition);
+
+                if (!isLoading) {
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount ){
+                        isLoading = true;
+                        updatePhotoList();
+                        Log.i(TAG,"Photo list was apdated");
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+            }
+        });
 
         setupAdapter();
         return v;
@@ -95,12 +127,26 @@ public class PhotoGalleryFragment extends Fragment {
         protected void onPostExecute(List<GalleryItem> item) {
             mItems = item;
             setupAdapter();
+            isLoading = false;
         }
     }
 
     private void setupAdapter(){
         if (isAdded()){
-            mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
+            PhotoAdapter adapter =(PhotoAdapter) mPhotoRecyclerView.getAdapter();
+            if (adapter == null){
+                mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
+            }else{
+                adapter.mGalleryItems.addAll(mItems);
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    private void updatePhotoList(){
+        if (FlickrFetchr.getMaxPage() > FlickrFetchr.getPageNumber()){
+            FlickrFetchr.updatePage();
+            new FetchItemTask().execute();
         }
     }
 }
