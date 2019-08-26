@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class PhotoGalleryFragment extends Fragment {
     private final String TAG = "PhotoGalleryFragment";
     private List<GalleryItem> mItems = new ArrayList<>();
     private boolean isLoading = false;
+    private int adapterPosition = 0;
 
     public static PhotoGalleryFragment newInstance(){
         return new PhotoGalleryFragment();
@@ -39,36 +41,40 @@ public class PhotoGalleryFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
-        final RecyclerView.LayoutManager manager = new GridLayoutManager(getActivity(),3);
         mPhotoRecyclerView = v.findViewById(R.id.photo_recycler_view);
-        mPhotoRecyclerView.setLayoutManager(manager);
+        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
+        final RecyclerView.LayoutManager manager = mPhotoRecyclerView.getLayoutManager();
+
         mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                int visibleItemCount = manager.getChildCount();
+
                 int totalItemCount = manager.getItemCount();
-                int firstVisibleItemPosition = ((GridLayoutManager) manager).findFirstVisibleItemPosition();
+                int lastVisiblePosition = ((GridLayoutManager) manager)
+                        .findLastVisibleItemPosition();
+                adapterPosition = ((GridLayoutManager) manager).findFirstVisibleItemPosition();
 
-                Log.i(TAG,"totalItemCount: " + totalItemCount +"\n"+
-                        "visible item count is: " + visibleItemCount+ "\n"+
-                        "first visible position is: " + firstVisibleItemPosition);
-
-                if (!isLoading) {
-                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount ){
-                        isLoading = true;
-                        updatePhotoList();
-                        Log.i(TAG,"Photo list was apdated");
-
-                    }
+                if (!isLoading && (lastVisiblePosition >= totalItemCount - 1)) {
+                    isLoading = true;
+                    updatePhotoList();
                 }
-
             }
+        });
 
+        ViewTreeObserver observer = mPhotoRecyclerView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+            public void onGlobalLayout() {
+                mPhotoRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
+                int recyclerViewWidth = mPhotoRecyclerView.getWidth();
+                int columnCount = recyclerViewWidth / 300;
+                GridLayoutManager manager = new GridLayoutManager(getActivity(),columnCount);
+                manager.scrollToPosition(adapterPosition);
+                mPhotoRecyclerView.setLayoutManager(manager);
+
+                Log.i(TAG, "onGlobalLayout is work");
             }
         });
 
@@ -101,6 +107,7 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         public PhotoHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             TextView textView = new TextView(getActivity());
+            textView.setLayoutParams(new ViewGroup.LayoutParams(300,ViewGroup.LayoutParams.WRAP_CONTENT));
             return new PhotoHolder(textView);
         }
 
