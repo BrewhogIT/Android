@@ -1,5 +1,6 @@
 package com.bignerdranch.android.photogallery;
 
+import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,8 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.ACTIVITY_SERVICE;
+
 public class PhotoGalleryFragment extends Fragment {
     private RecyclerView mPhotoRecyclerView;
     private final String TAG = "PhotoGalleryFragment";
@@ -38,8 +41,10 @@ public class PhotoGalleryFragment extends Fragment {
         setRetainInstance(true);
         new FetchItemTask().execute();
 
+        ActivityManager am = (ActivityManager)getActivity().getSystemService(ACTIVITY_SERVICE);
+
         Handler responseHandler = new Handler();
-        mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
+        mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler,am);
         mThumbnailDownloader.setThumbnailDownloadListener(
                 new ThumbnailDownloader.ThumbnailDownloadListener<PhotoHolder>() {
                     @Override

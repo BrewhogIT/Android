@@ -1,5 +1,6 @@
 package com.bignerdranch.android.photogallery;
 
+import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -11,6 +12,9 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static android.content.Context.ACTIVITY_SERVICE;
+import static android.support.v4.content.ContextCompat.getSystemService;
+
 public class ThumbnailDownloader<T> extends HandlerThread {
     private static final String TAG = "ThumbnailDownloader";
     private static final int MESSAGE_DOWNLOAD = 0;
@@ -20,6 +24,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     private ConcurrentMap<T,String> mRequestMap = new ConcurrentHashMap<>();
     private Handler mResponseHandler;
     private ThumbnailDownloadListener<T> mThumbnailDownloadListener;
+    private ImageCache mImageCache;
 
     public interface ThumbnailDownloadListener<T>{
         void onThumbnailDownloaded(T target,Bitmap thumbnail);
@@ -29,9 +34,13 @@ public class ThumbnailDownloader<T> extends HandlerThread {
         mThumbnailDownloadListener = listener;
     }
 
-    public ThumbnailDownloader(Handler responseHandler) {
+    public ThumbnailDownloader(Handler responseHandler,ActivityManager am) {
         super(TAG);
         mResponseHandler = responseHandler;
+
+        int memClass = am.getMemoryClass();
+        int cacheSize = 1024 * 1024 * memClass / 8;
+        mImageCache = new ImageCache(cacheSize);
     }
 
     @Override
@@ -41,8 +50,8 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             public void handleMessage(Message msg) {
                 if (msg.what == MESSAGE_DOWNLOAD){
                     T target = (T) msg.obj;
-                    Log.i(TAG, "Got a request for URL: " + mRequestMap
-                    .get(target));
+                    Log.i(TAG, "Got a request for URL: "
+                            + mRequestMap.get(target));
                     handleRequest(target);
                 }
             }
@@ -75,15 +84,21 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     private void handleRequest(final T target){
         try{
             final String url = mRequestMap.get(target);
-
+            final Bitmap bitmap;
             if (url == null){
                 return;
             }
 
-            byte[] bitmapBytes = new FlickrFetchr().getUrlBytes(url);
-            final Bitmap bitmap = BitmapFactory
-                    .decodeByteArray(bitmapBytes,0,bitmapBytes.length);
-            Log.i(TAG,"Bitmap created");
+            if (mImageCache.getBitmapFromMemory(url) == null){
+                byte[] bitmapBytes = new FlickrFetchr().getUrlBytes(url);
+                bitmap = BitmapFactory
+                        .decodeByteArray(bitmapBytes,0,bitmapBytes.length);
+                mImageCache.setBitmapToMemory(url,bitmap);
+                Log.i(TAG,"Bitmap created");
+            }else{
+                bitmap = mImageCache.getBitmapFromMemory(url);
+            }
+
 
             mResponseHandler.post(new Runnable() {
                 @Override
