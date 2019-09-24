@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -230,11 +231,22 @@ public class PhotoGalleryFragment extends Fragment {
         });
 
         MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
-        if (PollService.isServiceAlarmOn(getActivity())){
-            toggleItem.setTitle(R.string.stop_polling);
-        }else{
-            toggleItem.setTitle(R.string.start_polling);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (PollService.isServiceAlarmOn(getActivity())){
+                toggleItem.setTitle(R.string.stop_polling);
+            }else{
+                toggleItem.setTitle(R.string.start_polling);
+            }
+        } else {
+            if (PollServiceSchedule.isJobPlanned(getActivity())){
+                toggleItem.setTitle(R.string.stop_polling);
+            }else{
+                toggleItem.setTitle(R.string.start_polling);
+            }
         }
+
+
     }
 
     @Override
@@ -245,8 +257,15 @@ public class PhotoGalleryFragment extends Fragment {
                 updateItems();
                 return true;
             case R.id.menu_item_toggle_polling:
-                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
-                PollService.setServiceAlarm(getActivity(),shouldStartAlarm);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                    PollService.setServiceAlarm(getActivity(),shouldStartAlarm);
+                } else {
+                    boolean shouldStartPollServiceSchedule = !PollServiceSchedule.isJobPlanned(getActivity());
+                    PollServiceSchedule.setPollServiceSchedule(getActivity(),shouldStartPollServiceSchedule);
+                }
+
                 getActivity().invalidateOptionsMenu();
                 return true;
             default:

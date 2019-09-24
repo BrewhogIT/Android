@@ -23,7 +23,7 @@ public class PollService extends IntentService {
      * @param name Used to name the worker thread, important only for debugging.
      */
     private static final String TAG = "PollService";
-    private static final long POLL_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
+    public static final long POLL_INTERVAL_MS = TimeUnit.MINUTES.toMillis(15);
 
     public static Intent newIntent (Context context){
         return new Intent(context,PollService.class);
@@ -103,7 +103,8 @@ public class PollService extends IntentService {
     }
 
     private boolean isNetworkAvailableAndConnected(){
-        ConnectivityManager cm = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
         boolean isNetworkAvaliable = cm.getActiveNetworkInfo() != null;
         boolean isNetworkConnected = isNetworkAvaliable &&
                 cm.getActiveNetworkInfo().isConnected();
