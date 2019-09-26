@@ -31,7 +31,7 @@ import java.util.List;
 
 import static android.content.Context.ACTIVITY_SERVICE;
 
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
     private RecyclerView mPhotoRecyclerView;
     private final String TAG = "PhotoGalleryFragment";
     private List<GalleryItem> mItems = new ArrayList<>();
@@ -232,19 +232,21 @@ public class PhotoGalleryFragment extends Fragment {
 
         MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            if (PollService.isServiceAlarmOn(getActivity())){
-                toggleItem.setTitle(R.string.stop_polling);
-            }else{
-                toggleItem.setTitle(R.string.start_polling);
-            }
-        } else {
-            if (PollServiceSchedule.isJobPlanned(getActivity())){
-                toggleItem.setTitle(R.string.stop_polling);
-            }else{
-                toggleItem.setTitle(R.string.start_polling);
-            }
+        if (PollService.isServiceAlarmOn(getActivity())){
+            toggleItem.setTitle(R.string.stop_polling);
+        }else{
+            toggleItem.setTitle(R.string.start_polling);
         }
+
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+//            //there is must be PollService setTitle code
+//        } else {
+//            if (PollServiceSchedule.isJobPlanned(getActivity())){
+//                toggleItem.setTitle(R.string.stop_polling);
+//            }else{
+//                toggleItem.setTitle(R.string.start_polling);
+//            }
+//        }
 
 
     }
@@ -258,13 +260,15 @@ public class PhotoGalleryFragment extends Fragment {
                 return true;
             case R.id.menu_item_toggle_polling:
 
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
-                    PollService.setServiceAlarm(getActivity(),shouldStartAlarm);
-                } else {
-                    boolean shouldStartPollServiceSchedule = !PollServiceSchedule.isJobPlanned(getActivity());
-                    PollServiceSchedule.setPollServiceSchedule(getActivity(),shouldStartPollServiceSchedule);
-                }
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(),shouldStartAlarm);
+
+//                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+//                    //there is must be PollService setAlarm code
+//                } else {
+//                    boolean shouldStartPollServiceSchedule = !PollServiceSchedule.isJobPlanned(getActivity());
+//                    PollServiceSchedule.setPollServiceSchedule(getActivity(),shouldStartPollServiceSchedule);
+//                }
 
                 getActivity().invalidateOptionsMenu();
                 return true;
