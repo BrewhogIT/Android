@@ -47,7 +47,8 @@ public class PollServiceSchedule extends JobService {
                 context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         if (isOn) {
-            ComponentName serviceName = new ComponentName(context,PollServiceSchedule.class);
+            ComponentName serviceName = new ComponentName(context,
+                    PollServiceSchedule.class);
             JobInfo jobInfo = new JobInfo.Builder(JOB_ID,serviceName)
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                     .setPeriodic(PollService.POLL_INTERVAL_MS)

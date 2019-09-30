@@ -29,6 +29,8 @@ public abstract class VisibleFragment extends Fragment {
     private BroadcastReceiver mOnShowNotification = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // Получение означает, что пользователь видит приложение,
+            // поэтому оповещение отменяется
             Log.i(TAG,"cancel notification");
             setResultCode(Activity.RESULT_CANCELED);
         }
