@@ -1,24 +1,33 @@
 package com.bignerdranch.android.photogallery;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+
+import java.net.URISyntaxException;
 
 import javax.xml.validation.Schema;
 
 public class PhotoPageFragment extends VisibleFragment {
     private static final String ARG_URI ="photo_page_url";
+    private final String TAG = "PhotoPageFragment";
 
     public WebView mWebView;
     private ProgressBar mProgressBar;
@@ -65,13 +74,28 @@ public class PhotoPageFragment extends VisibleFragment {
             }
         });
         mWebView.setWebViewClient(new WebViewClient());
-
-        if (URLUtil.isHttpsUrl(mUri.toString()) || URLUtil.isHttpUrl(mUri.toString())){
-            mWebView.loadUrl(mUri.toString());
-        }else {
-            Intent i = new Intent(Intent.ACTION_VIEW,mUri);
-            startActivity(i);
-        }
+//        mWebView.setWebViewClient(new WebViewClient(){
+//            @Override
+//            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+//                Uri uri = request.getUrl();
+//                if(uri.getScheme().equals("http")|| uri.getScheme().equals("https")) {
+//                    return false;
+//                }else{
+//                    try {
+//                        Intent intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
+//                                .setAction(Intent.ACTION_VIEW);
+//                        Uri fallbackUri = intent.getParcelableExtra("browser_fallback_url");
+//                        Intent newIntent = new Intent (Intent.ACTION_VIEW,fallbackUri);
+//                        startActivity(intent);
+//
+//                    } catch (URISyntaxException e) {
+//                        e.printStackTrace();
+//                    }
+//                    return true;
+//                }
+//            }
+//        });
+        mWebView.loadUrl(mUri.toString());
 
         return v;
     }
