@@ -1,6 +1,7 @@
 package com.bignerdranch.android.draganddraw;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -19,4 +20,5 @@ public class DragAndDrawFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_drag_and_draw,container,false);
         return view;
     }
+
 }
