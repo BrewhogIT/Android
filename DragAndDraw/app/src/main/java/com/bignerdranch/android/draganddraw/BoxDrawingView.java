@@ -66,8 +66,6 @@ public class BoxDrawingView extends View {
                 mCurrentBox = new Box(touchPoint);
                 mBoxen.add(mCurrentBox);
                 break;
-            case MotionEvent.ACTION_POINTER_DOWN:
-                break;
             case MotionEvent.ACTION_MOVE:
                 action = "ACTION_MOVE";
                 if (mCurrentBox != null) {
@@ -82,8 +80,6 @@ public class BoxDrawingView extends View {
             case MotionEvent.ACTION_UP:
                 action = "ACTION_UP";
                 mCurrentBox = null;
-                break;
-            case MotionEvent.ACTION_POINTER_UP:
                 break;
             case MotionEvent.ACTION_CANCEL:
                 action = "ACTION_CANCEL";
@@ -101,9 +97,6 @@ public class BoxDrawingView extends View {
     protected void onDraw(Canvas canvas) {
         // Заполнение фона
         canvas.drawPaint(mBackgroundPaint);
-        RectF rectF;
-        Path path;
-        Matrix matrix;
 
         for (Box box: mBoxen){
             float left = Math.min(box.getOrigin().x, box.getCurrent().x);
@@ -126,7 +119,8 @@ public class BoxDrawingView extends View {
     protected Parcelable onSaveInstanceState() {
         Bundle statusSave = new Bundle();
         statusSave.putParcelableArrayList(LIST_BOX_KEY,mBoxen);
-        statusSave.putParcelable(PARENT_STATUS_KEY, super.onSaveInstanceState());
+        statusSave.putParcelable(PARENT_STATUS_KEY,
+                super.onSaveInstanceState());
 
         return statusSave;
     }
@@ -136,14 +130,16 @@ public class BoxDrawingView extends View {
         if (state != null && state instanceof Bundle) {
             Bundle parentStatus =(Bundle) state;
             mBoxen = parentStatus.getParcelableArrayList(LIST_BOX_KEY);
-            super.onRestoreInstanceState(parentStatus.getParcelable(PARENT_STATUS_KEY));
+            super.onRestoreInstanceState(parentStatus
+                    .getParcelable(PARENT_STATUS_KEY));
         } else {
             super.onRestoreInstanceState(state);
         }
     }
 
     protected float getAngle(PointF origin, PointF current){
-        float angle =(float) Math.toDegrees(Math.atan2(current.y - origin.y,current.x - origin.x));
+        float angle =(float) Math.toDegrees(
+                Math.atan2(current.y - origin.y,current.x - origin.x));
         return angle;
     }
 }
