@@ -1,6 +1,12 @@
 package com.bignerdranch.android.locatr;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,7 +15,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -31,6 +41,7 @@ import java.util.List;
 public class LocatrFragment extends Fragment {
     private ImageView mImageView;
     private GoogleApiClient mClient;
+    private ProgressBar mProgressBar;
 
     private static final String TAG = "LocatrFragment";
     private static final String[] LOCATION_PERMISSIONS = new String[]{
@@ -38,6 +49,9 @@ public class LocatrFragment extends Fragment {
             Manifest.permission.ACCESS_FINE_LOCATION
     };
     private static final int REQUEST_LOCATION_PERMISSIONS = 0;
+    private static final int REQUEST_TRANSCRIPTION_DIALOG = 1;
+    private boolean shouldShowPermissionTranscription;
+
 
     public static LocatrFragment newInstance(){
         return new LocatrFragment();
@@ -58,7 +72,6 @@ public class LocatrFragment extends Fragment {
 
                     @Override
                     public void onConnectionSuspended(int i) {
-
                     }
                 })
                 .build();
@@ -71,6 +84,8 @@ public class LocatrFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_locatr,container,false);
 
         mImageView = view.findViewById(R.id.image);
+        mProgressBar = view.findViewById(R.id.preLoaderProgressBar);
+
         return view;
     }
 
@@ -105,8 +120,16 @@ public class LocatrFragment extends Fragment {
                 if (hasLocationPermission()) {
                     findImage();
                 }else{
-                    requestPermissions(LOCATION_PERMISSIONS,
-                            REQUEST_LOCATION_PERMISSIONS);
+                    shouldShowPermissionTranscription = ActivityCompat.shouldShowRequestPermissionRationale(
+                            getActivity(),LOCATION_PERMISSIONS[0]);
+                    if (shouldShowPermissionTranscription) {
+                        FragmentManager manager = getActivity().getSupportFragmentManager();
+                        TranscriptionPermissionDialog dialog = new TranscriptionPermissionDialog();
+                        dialog.show(manager,TAG);
+                    }else {
+                        requestPermissions(LOCATION_PERMISSIONS,
+                                REQUEST_LOCATION_PERMISSIONS);
+                    }
                 }
                 return true;
             default:
@@ -152,6 +175,11 @@ public class LocatrFragment extends Fragment {
         private Bitmap mBitmap;
 
         @Override
+        protected void onPreExecute() {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected Void doInBackground(Location... locations) {
             FlickrFetchr fetchr = new FlickrFetchr();
             List<GalleryItem> items = fetchr.searchPhotos(locations[0]);
@@ -174,7 +202,32 @@ public class LocatrFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            mProgressBar.setVisibility(View.INVISIBLE);
             mImageView.setImageBitmap(mBitmap);
         }
     }
+
+    public static class TranscriptionPermissionDialog extends DialogFragment {
+
+        @NonNull
+        @Override
+        public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+            return new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.transcription_permission_string)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            onCancel(dialog);
+                        }
+                    })
+                    .create();
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            requestPermissions(LOCATION_PERMISSIONS,
+                    REQUEST_LOCATION_PERMISSIONS);
+        }
+    }
+
 }

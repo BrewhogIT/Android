@@ -30,6 +30,7 @@ public class LocatrActivity extends SingleFragmentActivity {
                             new DialogInterface.OnCancelListener() {
                                 @Override
                                 public void onCancel(DialogInterface dialog) {
+                                    //Выйти, если сервис недоступен
                                     finish();
                                 }
                             });
