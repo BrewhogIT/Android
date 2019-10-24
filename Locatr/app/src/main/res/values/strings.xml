@@ -5,4 +5,5 @@
     <string name="permission_dialog_title">Need permission before begin</string>
     <string name="loading">Loading ...</string>
     <string name="transcription_permission_string">Locatr использует позиционные данные для поиска близлежащих изображений на Flickr</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
