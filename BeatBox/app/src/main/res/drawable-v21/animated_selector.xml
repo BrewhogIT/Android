@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/pressed"
+          android:drawable="@drawable/ic_button_beat_box_pressed"
+          android:state_pressed="true"/>
+    <item android:id="@+id/released"
+          android:drawable="@drawable/ic_button_beat_box_default"/>
+
+    <transition
+        android:fromId="@id/released"
+        android:toId="@id/pressed">
+        <animation-list>
+            <item android:duration="25" android:drawable="@drawable/somedrawable1"/>
+            <item android:duration="25" android:drawable="@drawable/somedrawable2"/>
+            <item android:duration="25" android:drawable="@drawable/somedrawable3"/>
+            <item android:duration="25" android:drawable="@drawable/somedrawable4"/>
+            <item android:duration="25" android:drawable="@drawable/somedrawable5"/>
+            <item android:duration="25" android:drawable="@drawable/ic_button_beat_box_pressed"/>
+        </animation-list>
+    </transition>
+
+</animated-selector>

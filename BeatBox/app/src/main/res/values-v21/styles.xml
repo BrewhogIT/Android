@@ -1,6 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/red</item>
@@ -10,9 +9,8 @@
         <item name="android:windowBackground">@color/soothing_blue</item>
         <item name="android:buttonStyle">@style/BeatBoxButton</item>
     </style>
-    
+
     <style name="BeatBoxButton" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/button_beat_box</item>
     </style>
-
 </resources>

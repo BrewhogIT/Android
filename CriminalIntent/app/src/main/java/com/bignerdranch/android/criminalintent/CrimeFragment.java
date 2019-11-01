@@ -242,10 +242,13 @@ public class CrimeFragment extends Fragment {
         mPhotoView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager manager = getFragmentManager();
-                PictureFragment fragment = PictureFragment.newInstance(mPhotoFile);
+                if (mPhotoFile == null || mPhotoFile.getPath() == null){
+                    return;
+                }
 
-                fragment.show(manager,DIALOG_PICTURE);
+                Intent intent = ImageActivity
+                        .newInstance(getActivity(),Uri.parse(mPhotoFile.getPath()));
+                ImageActivity.startWithTransition(getActivity(),intent,mPhotoView);
             }
         });
 
@@ -269,6 +272,8 @@ public class CrimeFragment extends Fragment {
 
         return v;
     }
+
+
 
     @Override
     public void onPause() {
